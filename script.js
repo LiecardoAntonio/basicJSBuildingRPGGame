@@ -48,6 +48,24 @@ const weapons = [
   }
 ];
 
+const monsters = [
+  {
+    name : "slime",
+    level: 2,
+    health: 15
+  }, 
+  {
+    name: "fanged beast",
+    level: 8,
+    health: 60
+  }, 
+  {
+    name: "dragon",
+    level: 20,
+    health: 300
+  }
+]
+
 const locations = [
   {
     name: "town square",
@@ -61,6 +79,12 @@ const locations = [
     "button functions": [buyHealth, buyWeapon, goTown],
     text:  "You enter the store."
   },
+  {
+    name: "cave",
+    "button text": ["Fight slime", "Fight fanged beast", "Go to town square"],
+    "button functions": [fightSlime, fightBeast, goTown],
+    text: "You enter the cave. You see some monsters."
+  }, 
   {
     name: "cave",
     "button text": ["Fight slime", "Fight fanged beast", "Go to town square"],
@@ -108,10 +132,6 @@ function goCave() {
   update(locations[2]);
 }
 
-function fightDragon() {
-  console.log("Fighting dragon.");
-}
-
 function buyHealth() {
   if(gold>=10) {
     gold -= 10;
@@ -124,21 +144,69 @@ function buyHealth() {
 }
 
 function buyWeapon() {
-  if (gold >= 30) {
-    gold -= 30;
-    currentWeaponIndex++;
+  if(currentWeaponIndex < weapons.length-1) {
+    if (gold >= 30) {
+      gold -= 30;
+      currentWeaponIndex++;
+      goldText.innerText = gold;
+      let newWeapon = weapons[currentWeaponIndex].name; //You should tell the player what weapon they bought. In between the two lines you just wrote, use let to initialize a new variable called newWeapon. Set this to equal weapons.
+      text.innerText = "You now have a " + newWeapon + ".";
+      inventory.push(newWeapon); //add the item in to inventory
+      text.innerText += " In your inventory you have: " + inventory; //Up until now, any time text.innerText was updated, the old text was erased. This time, use the += operator to add text to the end of text.innerText.
+    }
+    else {
+      text.innerText = "You do not have enough gold to buy a weapon.";
+    }
+  } else {
+    // if the player already has all the weapon he have the option to sell it
+    button2.innerText = "Sell weapon for 15 gold"
+    button2.onclick = sellWeapon;
+    text.innerText = "You already have the most powerful weapon!";
   }
-  goldText.innerText = gold;
-  let newWeapon = weapons[currentWeaponIndex].name; //You should tell the player what weapon they bought. In between the two lines you just wrote, use let to initialize a new variable called newWeapon. Set this to equal weapons.
-  text.innerText = "You now have a " + newWeapon + ".";
-  inventory.push(newWeapon); //add the item in to inventory
+}
+
+function sellWeapon() {
+  if (inventory.length > 1) {
+    gold += 15;
+    goldText.innerText = gold;
+    let currentWeapon = inventory.shift();
+    text.innerText = "You sold a " + currentWeapon + ".";
+    text.innerText += " In your inventory you have: " + inventory;
+  } else {
+    text.innerText = "Don't sell your only weapon!";
+  }
 }
 
 function fightSlime() {
-
+  fighting = 0; //this 0 is the slime index in the monsters array
+  goFight();
 }
 
 function fightBeast() {
+  fighting = 1; //this 1 is the beast index in the monsters array
+  goFight();
+}
+
+function fightDragon() {
+  fighting = 2; //this 2 is the dragon index in the monsters array
+  goFight();
+}
+
+function goFight() {
+  update(locations[3]);
+  monsterHealth = monsters[fighting].health; //adjusting to the index of monster we're fighting
+  monsterStats.style.display = 'block'; //access the monsterStats element id in the html code and manipulating the style with inline styling
+  monsterName.innerText = monsters[fighting].name;
+  monsterHealthText.innerText = monsters[fighting].health;
+}
+
+function attack() {
+  text.innerText = "The " + monsters[fighting].name + " attacks.";
+  text.innerText += " You attack it with your " + weapons[currentWeaponIndex].name +".";
+  health -= monsters[fighting].level;
+}
+
+function dodge() {
   
 }
 
