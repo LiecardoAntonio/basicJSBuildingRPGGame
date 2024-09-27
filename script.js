@@ -90,19 +90,38 @@ const locations = [
     "button text": ["Fight slime", "Fight fanged beast", "Go to town square"],
     "button functions": [fightSlime, fightBeast, goTown],
     text: "You enter the cave. You see some monsters."
+  },
+  {
+    name: "kill monster",
+    "button text": ["Go to town square", "Go to town square", "Go to town square"],
+    "button functions": [goTown , goTown , goTown],
+    text: 'The monster screams "Arg!" as it dies. You gain experience points and find gold.'
+  },
+  {
+    name: "lose",
+    "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
+    "button functions": [restart , restart , restart ],
+    text: 'You die. &#x2620;'
+  },
+  {
+      name: "win",
+      "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
+      "button functions": [restart, restart, restart],
+      text: "You defeat the dragon! YOU WIN THE GAME! &#x1F389;"
   }
 ];
 
 // Creating function for RPG-game
 function update(location) {
   //this way, we dont need to assign every value for everytime we changes location using the respective function
+  monsterStats.style.display = 'none'; //hide the monster if we're not clicking the fight button
   button1.innerText = location["button text"][0];
   button2.innerText = location["button text"][1];
   button3.innerText = location["button text"][2];
   button1.onclick = location["button functions"][0];
   button2.onclick = location["button functions"][1];
   button3.onclick = location["button functions"][2];
-  text.innerText = location.text;
+  text.innerHTML = location.text; //n order for the &#x2620; emoticon text to properly display on the page, you will need to use the innerHTML property. The innerHTML property allows you to access or modify the content inside an HTML element using JavaScript.
 }
 
 function goTown() {
@@ -137,7 +156,7 @@ function buyHealth() {
     gold -= 10;
     health += 10;
     goldText.innerText = gold;
-    healthText.innerText = health;
+    healthText.innerText = '';
   } else {
     text.innerText = "You do not have enough gold to buy health."
   }
@@ -204,10 +223,52 @@ function attack() {
   text.innerText = "The " + monsters[fighting].name + " attacks.";
   text.innerText += " You attack it with your " + weapons[currentWeaponIndex].name +".";
   health -= monsters[fighting].level;
+  monsterHealth -= weapons[currentWeaponIndex].power + Math.floor(Math.random() * xp) + 1;
+  // The Math object in JavaScript contains static properties and methods for mathematical constants and functions. One of those is Math.random(), which generates a random number from 0 (inclusive) to 1 (exclusive). Another is Math.floor(), which rounds a given number down to the nearest integer. Using these, you can generate a random number within a range. For example, this generates a random number between 1 and 5: Math.floor(Math.random() * 5) + 1;.
+  healthText.innerText = health;
+  monsterHealthText.innerText = monsterHealth;
+  if (health <= 0) {
+    lose();
+  } else if (monsterHealth <= 0) {
+    defeatMonster();
+    if (fighting === 2) { //if we win against the dragon
+      winGame();
+    } else {
+      defeatMonster();
+    }
+  }
 }
 
 function dodge() {
-  
+  text.innerText = "You dodge the attack from the " + monsters[fighting].name;
+}
+
+function defeatMonster() {
+  gold += Math.floor(monsters[fighting].level * 6.7);
+  xp += monsters[fighting].level;
+  goldText.innerText = gold;
+  xpText.innerText = xp;
+  update(locations[4]); 
+}
+
+function lose() {
+  update(locations[5]);
+}
+
+function winGame() {
+  update(locations[6]);
+}
+
+function restart() {
+  xp = 0;
+  health = 100;
+  gold = 50;
+  currentWeaponIndex = 0;
+  inventory = ["stick"];
+  goldText.innerText = gold;
+  healthText.innerText = health;
+  xpText.innerText = xp;
+  goTown();
 }
 
 // initialize buttons functionalities
