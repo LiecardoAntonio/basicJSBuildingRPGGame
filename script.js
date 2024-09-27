@@ -108,6 +108,12 @@ const locations = [
       "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
       "button functions": [restart, restart, restart],
       text: "You defeat the dragon! YOU WIN THE GAME! &#x1F389;"
+  },
+  {
+    name: "easter egg", 
+    "button text": ["2", "8", "Go to town square?"], 
+    "button functions": [pickTwo, pickEight, goTown], 
+    text: "You find a secret game. Pick a number above. Ten numbers will be randomly chosen between 0 and 10. If the number you choose matches one of the random numbers, you win!"
   }
 ];
 
@@ -222,8 +228,14 @@ function goFight() {
 function attack() {
   text.innerText = "The " + monsters[fighting].name + " attacks.";
   text.innerText += " You attack it with your " + weapons[currentWeaponIndex].name +".";
-  health -= monsters[fighting].level;
-  monsterHealth -= weapons[currentWeaponIndex].power + Math.floor(Math.random() * xp) + 1;
+  health -= getMonsterAttackValue(monsters[fighting].level);
+
+  //manage to hit or miss
+  if(isMonsterHit()) {
+    monsterHealth -= weapons[currentWeaponIndex].power + Math.floor(Math.random() * xp) + 1;
+  } else {
+    text.innerText += " You miss.";
+  }
   // The Math object in JavaScript contains static properties and methods for mathematical constants and functions. One of those is Math.random(), which generates a random number from 0 (inclusive) to 1 (exclusive). Another is Math.floor(), which rounds a given number down to the nearest integer. Using these, you can generate a random number within a range. For example, this generates a random number between 1 and 5: Math.floor(Math.random() * 5) + 1;.
   healthText.innerText = health;
   monsterHealthText.innerText = monsterHealth;
@@ -237,6 +249,26 @@ function attack() {
       defeatMonster();
     }
   }
+
+  //chance for your weapon to breaks. (0.1% and only if u have more than 1 weapon)
+  if (Math.random() <= .1 && inventory.length!==1) {
+    text.innerText += " Your " + inventory.pop() + " breaks."
+    //inventory.pop() return the value that's getting popped
+    currentWeaponIndex--;
+  }
+}
+
+function getMonsterAttackValue(level) {
+  const hit = (level * 5) - (Math.floor(Math.random() * xp)); //enemies attack will deal 5 times its level minus a random number between 0 and the player's xp
+  console.log(hit);
+  return hit > 0 ? hit : 0; 
+  //return hit // If you play the game in its current state you might notice a bug. If your xp is high enough, the getMonsterAttackValue function will return a negative number, which will actually add to your total health when fighting a monster! You can fix this issue by using a ternary operator to ensure negative values are not returned.
+}
+
+function isMonsterHit() {
+  //function to make your attack able to miss at 20% chance
+  return Math.random() > .2 || health < 20;
+  // if your health is < 20, u will not miss
 }
 
 function dodge() {
@@ -269,6 +301,27 @@ function restart() {
   healthText.innerText = health;
   xpText.innerText = xp;
   goTown();
+}
+
+function easterEgg() {
+  update(locations[7]);
+}
+
+function pickTwo() {
+  pick(2);
+}
+
+function pickEight() {
+  pick(8);
+}
+
+function pick(guess) {
+  const numbers = [];
+  while(numbers.length<10) {
+    numbers.push(Math.floor(Math.random() * 11));
+  }
+  text.innerText = "You picked " + guess +". Here are the random numbers:\n";
+   
 }
 
 // initialize buttons functionalities
